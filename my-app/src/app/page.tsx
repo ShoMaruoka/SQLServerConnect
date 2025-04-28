@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { initWoff } from '@/lib/woff';
+import { fetchApi } from '@/lib/api';
 import { Order } from '@/types';
 import InitializeApp from './components/setup/InitializeApp';
 
@@ -15,8 +16,12 @@ export default function HomePage() {
     // WOFF SDK 初期化
     const initializeWoff = async () => {
       try {
-        // 実際の WOFF ID に置き換える
-        await initWoff('YOUR_WOFF_ID_HERE');
+        // 環境変数からWOFF IDを取得
+        const woffId = process.env.NEXT_PUBLIC_WOFF_ID;
+        if (!woffId) {
+          console.warn('WOFF ID が設定されていません。環境変数 NEXT_PUBLIC_WOFF_ID を確認してください。');
+        }
+        await initWoff(woffId || '');
       } catch (err) {
         console.error('WOFF初期化エラー:', err);
       }
@@ -28,14 +33,9 @@ export default function HomePage() {
     const fetchOrders = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/orders');
-        
-        if (!response.ok) {
-          throw new Error('注文データの取得に失敗しました');
-        }
-        
-        const data = await response.json();
-        setOrders(data.data || []);
+        // APIユーティリティを使用
+        const result = await fetchApi<{success: boolean, data: Order[]}>('/api/orders');
+        setOrders(result.data || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : '注文データの取得中にエラーが発生しました');
         console.error('注文データ取得エラー:', err);

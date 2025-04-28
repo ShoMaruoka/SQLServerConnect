@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { OrderDetail, Product } from '@/types';
+import { fetchApi, putApi } from '@/lib/api';
 import ProductModal from '@/app/components/ProductModal';
 
 export default function OrderDetailPage({ params }: { params: { orderId: string } }) {
@@ -20,14 +21,8 @@ export default function OrderDetailPage({ params }: { params: { orderId: string 
     const fetchOrderDetails = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/orders/${params.orderId}`);
-        
-        if (!response.ok) {
-          throw new Error('注文明細データの取得に失敗しました');
-        }
-        
-        const data = await response.json();
-        setOrderDetails(data.data || []);
+        const result = await fetchApi<{success: boolean, data: OrderDetail[]}>(`/api/orders/${params.orderId}`);
+        setOrderDetails(result.data || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : '注文明細データの取得中にエラーが発生しました');
         console.error('注文明細データ取得エラー:', err);
@@ -42,14 +37,8 @@ export default function OrderDetailPage({ params }: { params: { orderId: string 
   // 商品情報取得
   const handleProductClick = async (productCode: string) => {
     try {
-      const response = await fetch(`/api/products/${productCode}`);
-      
-      if (!response.ok) {
-        throw new Error('商品情報の取得に失敗しました');
-      }
-      
-      const data = await response.json();
-      setSelectedProduct(data.data);
+      const result = await fetchApi<{success: boolean, data: Product}>(`/api/products/${productCode}`);
+      setSelectedProduct(result.data);
       setIsProductModalOpen(true);
     } catch (err) {
       console.error('商品情報取得エラー:', err);
@@ -73,27 +62,15 @@ export default function OrderDetailPage({ params }: { params: { orderId: string 
         return;
       }
       
-      const response = await fetch(`/api/orders/${params.orderId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          detailId: detail.detailId,
-          newPrice: priceValue
-        }),
+      const result = await putApi<{success: boolean, data: OrderDetail}>(`/api/orders/${params.orderId}`, {
+        detailId: detail.detailId,
+        newPrice: priceValue
       });
-      
-      if (!response.ok) {
-        throw new Error('価格の更新に失敗しました');
-      }
-      
-      const data = await response.json();
       
       // 更新された明細で配列を更新
       setOrderDetails(prevDetails => 
         prevDetails.map(item => 
-          item.detailId === detail.detailId ? data.data : item
+          item.detailId === detail.detailId ? result.data : item
         )
       );
       

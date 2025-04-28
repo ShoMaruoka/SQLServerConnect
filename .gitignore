@@ -10,3 +10,4 @@ setup-db.sh
 todo.md
 readme-docker.md
 node_modules
+.env.local
