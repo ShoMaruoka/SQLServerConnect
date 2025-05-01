@@ -4,7 +4,7 @@
 フロントエンド: React
 バックエンド: Node.js
 データベース: SQL Server
-ホスティング: Vercel
+ホスティング: Windows Server 2022 Standard
 認証/連携: LINE WORKS (WOFF)
 
 ## 詳細技術スタック
@@ -27,7 +27,7 @@ serverless functions (Vercel上での実行環境)
 SQL Server14.0.3370.1 (テストDBはDockerに構築)
 
 ### デプロイ/インフラ
-Vercel (ホスティングプラットフォーム)
+Windows Server 2022 Standard (ホスティングプラットフォーム)
 GitHub Actions (CI/CD)
 Environment Variables (環境変数管理)
 
