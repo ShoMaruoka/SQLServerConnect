@@ -2,13 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/lib/db';
 import { OrderDetail, ApiResponse, UpdatePriceRequest } from '@/types';
 
+// 型定義を明示的に作成
+type OrderContext = {
+  params: {
+    orderId: string;
+  };
+};
+
 // GET /api/orders/[orderId] - 特定の注文の明細を取得
 export async function GET(
   request: NextRequest,
-  { params }: { params: { orderId: string } }
+  context: OrderContext
 ) {
   try {
-    const orderId = parseInt(params.orderId);
+    const orderId = parseInt(context.params.orderId);
     
     if (isNaN(orderId)) {
       return NextResponse.json(
@@ -61,10 +68,10 @@ export async function GET(
 // PUT /api/orders/[orderId] - 注文明細の価格を更新
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { orderId: string } }
+  context: OrderContext
 ) {
   try {
-    const orderId = parseInt(params.orderId);
+    const orderId = parseInt(context.params.orderId);
     
     if (isNaN(orderId)) {
       return NextResponse.json(
